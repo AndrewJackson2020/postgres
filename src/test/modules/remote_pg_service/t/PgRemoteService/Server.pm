@@ -87,10 +87,11 @@ Runs the remote pg service server daemon in t/remote_service_server.py.
 sub run
 {
 	my $self = shift;
+	my $service_file_path = shift;
 	my $port;
 
 	print $ENV{PYTHON};
-	my $pid = open(my $read_fh, "-|", "python", "t/remote_service_server.py")
+	my $pid = open(my $read_fh, "-|", "python", "t/remote_service_server.py", $service_file_path)
 	  or die "failed to start remote pg_service server: $!";
 
 	# Get the port number from the daemon. It closes stdout afterwards; that way

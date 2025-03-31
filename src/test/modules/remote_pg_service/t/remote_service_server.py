@@ -32,13 +32,12 @@ class ServiceFileHandler(http.server.BaseHTTPRequestHandler):
         Sends the provided JSON dict as an application/json response.
         self._response_code can be modified to send JSON error responses.
         """
-        service_file = """
-        [postgres_service]
-        host = 127.0.0.1
-        port = 5432
-        """
-        service_file = textwrap.dedent(service_file)
-        resp = service_file.encode("ascii")
+
+        service_file_path = sys.argv[1]
+        with open(service_file_path, "r") as file:
+            service_file_content = file.read()
+
+        resp = service_file_content.encode()
         self.log_message("sending string response: %s", resp)
 
         self.send_response(self._response_code)
