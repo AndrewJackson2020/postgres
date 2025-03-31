@@ -22,6 +22,9 @@ if ($ENV{with_python} ne 'yes')
 
 my $td = PostgreSQL::Test::Utils::tempdir;
 
+my $node_dummy = PostgreSQL::Test::Cluster->new('node_dummy');
+$node_dummy->init;
+
 my $node = PostgreSQL::Test::Cluster->new('node');
 $node->init;
 $node->start;
@@ -70,33 +73,38 @@ local $ENV{PGSERVICEFILE} = "$srvfile_empty";
 
 {
 	local $ENV{PGSERVICEFILE} = $issuer;
-	$node->connect_ok(
+
+	$node_dummy->connect_ok(
 		'service=my_srv',
 		'connection with correct "service" string and PGSERVICEFILE',
 		sql => "SELECT 'connect1_1'",
 		expected_stdout => qr/connect1_1/);
 
-	$node->connect_ok(
+	$node_dummy->connect_ok(
 		'postgres://?service=my_srv',
 		'connection with correct "service" URI and PGSERVICEFILE',
 		sql => "SELECT 'connect1_2'",
 		expected_stdout => qr/connect1_2/);
 
-	$node->connect_fails(
+	$node_dummy->connect_fails(
 		'service=non_existant_service',
 		'connection with incorrect PGSERVICE and correct PGSERVICEFILE',
 		expected_stdout =>
 		  qr/definition of service "undefined-service" not found/);
 
+	$node_dummy->connect_fails(
+		'',
+		'connection with blank string');
+
 	local $ENV{PGSERVICE} = 'my_srv';
-	$node->connect_ok(
+	$node_dummy->connect_ok(
 		'',
 		'connection with correct PGSERVICE and PGSERVICEFILE',
 		sql => "SELECT 'connect1_3'",
 		expected_stdout => qr/connect1_3/);
 
 	local $ENV{PGSERVICE} = 'undefined-service';
-	$node->connect_fails(
+	$node_dummy->connect_fails(
 		'',
 		'connection with incorrect PGSERVICE and PGSERVICEFILE',
 		expected_stdout =>
