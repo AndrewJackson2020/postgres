@@ -393,10 +393,11 @@ static const internalPQconninfoOption PQconninfoOptions[] = {
 
 	{"scram_server_key", NULL, NULL, NULL, "SCRAM-Server-Key", "D", SCRAM_MAX_KEY_LEN * 2,
 	offsetof(struct pg_conn, scram_server_key)},
-	{"check_all_addrs", "PGCHECKALLADDRS",
-		DefaultLoadBalanceHosts, NULL,
-		"Check-All-Addrs", "", 1,
-	offsetof(struct pg_conn, check_all_addrs)},
+
+	{"try_all_addrs", "PGTRYALLADDRS",
+		"0", NULL,
+		"Try-All-Addrs", "", 1,
+	offsetof(struct pg_conn, try_all_addrs)},
 
 	/* OAuth v2 */
 	{"oauth_issuer", NULL, NULL, NULL,
@@ -2022,6 +2023,21 @@ pqConnectOptions2(PGconn *conn)
 	else
 		conn->target_server_type = SERVER_TYPE_ANY;
 
+	if (conn->try_all_addrs){
+		if (strcmp(conn->try_all_addrs, "0") == 0)
+			conn->try_all_addrs_type = TRY_ALL_ADDRS_DISABLE;
+		else if (strcmp(conn->try_all_addrs, "1") == 0)
+			conn->try_all_addrs_type = TRY_ALL_ADDRS_ENABLE;
+		else {
+			conn->status = CONNECTION_BAD;
+			libpq_append_conn_error(conn, "invalid %s value: \"%s\"",
+									"try_all_addrs",
+									conn->try_all_addrs);
+			return false;
+		}
+	} else
+		conn->try_all_addrs_type = TRY_ALL_ADDRS_DISABLE;
+
 	if (conn->scram_client_key)
 	{
 		int			len;
@@ -2110,6 +2126,7 @@ pqConnectOptions2(PGconn *conn)
 			conn->connhost[i] = temp;
 		}
 	}
+
 
 	if (conn->min_protocol_version)
 	{
@@ -4438,7 +4455,7 @@ keep_going:						/* We will come back to here until there is
 						conn->status = CONNECTION_OK;
 						sendTerminateConn(conn);
 
-						if (strcmp(conn->check_all_addrs, "1") == 0)
+						if (conn->try_all_addrs_type == TRY_ALL_ADDRS_ENABLE)
 							conn->try_next_addr = true;
 						else
 							conn->try_next_host = true;
@@ -4493,7 +4510,7 @@ keep_going:						/* We will come back to here until there is
 						conn->status = CONNECTION_OK;
 						sendTerminateConn(conn);
 
-						if (strcmp(conn->check_all_addrs, "1") == 0)
+						if (conn->try_all_addrs_type == TRY_ALL_ADDRS_ENABLE)
 							conn->try_next_addr = true;
 						else
 							conn->try_next_host = true;
@@ -5131,7 +5148,7 @@ freePGconn(PGconn *conn)
 	free(conn->inBuffer);
 	free(conn->outBuffer);
 	free(conn->rowBuf);
-	free(conn->check_all_addrs);
+	free(conn->try_all_addrs);
 	termPQExpBuffer(&conn->errorMessage);
 	termPQExpBuffer(&conn->workBuffer);
 

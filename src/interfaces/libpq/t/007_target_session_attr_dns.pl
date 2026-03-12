@@ -67,27 +67,27 @@ $node_primary2 ->start();
 
 # target_session_attrs=primary should always choose the first one.
 $node_primary1->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=primary check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=primary try_all_addrs=1",
 	"target_session_attrs=primary connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_primary1->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=read-write check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=read-write try_all_addrs=1",
 	"target_session_attrs=read-write connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_primary1->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=any check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=any try_all_addrs=1",
 	"target_session_attrs=any connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_standby->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=standby check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=standby try_all_addrs=1",
 	"target_session_attrs=standby connects to the third node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_standby->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=read-only check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=read-only try_all_addrs=1",
 	"target_session_attrs=read-only connects to the third node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
@@ -97,27 +97,27 @@ $node_primary1->stop();
 
 # target_session_attrs=primary should always choose the first one.
 $node_primary2->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=primary check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=primary try_all_addrs=1",
 	"target_session_attrs=primary connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_primary2->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=read-write check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=read-write try_all_addrs=1",
 	"target_session_attrs=read-write connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_standby->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=any check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=any try_all_addrs=1",
 	"target_session_attrs=any connects to the first node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_standby->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=standby check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=standby try_all_addrs=1",
 	"target_session_attrs=standby connects to the third node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);
 $node_standby->connect_ok(
-	"host=pg-loadbalancetest port=$port target_session_attrs=read-only check_all_addrs=1",
+	"host=pg-loadbalancetest port=$port target_session_attrs=read-only try_all_addrs=1",
 	"target_session_attrs=read-only connects to the third node",
 	sql => "SELECT 'connect1'",
 	log_like => [qr/statement: SELECT 'connect1'/]);

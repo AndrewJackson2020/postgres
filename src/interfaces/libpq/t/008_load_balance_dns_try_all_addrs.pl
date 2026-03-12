@@ -67,7 +67,7 @@ sub test_target_session_attr {
 	my $target_session_attrs = shift;
 	my $test_num = shift;
 	my $primary1_expect_traffic = shift;
-	my $standby_expeect_traffic = shift;
+	my $standby_expect_traffic = shift;
 	my $primary2_expect_traffic = shift;
 	# Statistically the following loop with load_balance_hosts=random will almost
 	# certainly connect at least once to each of the nodes. The chance of that not
@@ -75,7 +75,7 @@ sub test_target_session_attr {
 	foreach my $i (1 .. 50)
 	{
 		$node_primary1->connect_ok(
-			"host=pg-loadbalancetest port=$port load_balance_hosts=random target_session_attrs=${target_session_attrs} check_all_addrs=1",
+			"host=pg-loadbalancetest port=$port load_balance_hosts=random target_session_attrs=${target_session_attrs} try_all_addrs=1",
 			"repeated connections with random load balancing",
 			sql => "SELECT 'connect${test_num}'");
 	}
@@ -94,7 +94,7 @@ sub test_target_session_attr {
 	}else{
 		ok($node_primary1_occurrences == 0, "received at least one connection on node1");
 	}
-	if ($standby_expeect_traffic == 1) {
+	if ($standby_expect_traffic == 1) {
 		ok($node_standby_occurrences > 0, "received at least one connection on node1");
 	}else{
 		ok($node_standby_occurrences == 0, "received at least one connection on node1");

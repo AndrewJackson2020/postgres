@@ -2568,12 +2568,12 @@ postgresql://%2Fvar%2Flib%2Fpostgresql/dbname
       </listitem>
      </varlistentry>
 
-     <varlistentry id="libpq-connect-check-all-addrs" xreflabel="check_all_addrs">
-      <term><literal>check_all_addrs</literal></term>
+     <varlistentry id="libpq-connect-try-all-addrs" xreflabel="try_all_addrs">
+      <term><literal>try_all_addrs</literal></term>
       <listitem>
        <para>
-        Controls whether or not all addresses within a hostname are checked when trying to make a connection
-        when attempting to find a connection with a matching <xref linkend="libpq-connect-target-session-attrs"/>.
+        Controls whether or not all addresses within a hostname are tried when trying to make a connection
+        with a matching <xref linkend="libpq-connect-target-session-attrs"/>.
 
         There are two modes:
         <variablelist>
@@ -2582,7 +2582,7 @@ postgresql://%2Fvar%2Flib%2Fpostgresql/dbname
           <listitem>
            <para>
             If a successful connection is made and that connection is found to have a
-            mismatching <xref linkend="libpq-connect-target-session-attrs"/> do not check
+            mismatching <xref linkend="libpq-connect-target-session-attrs"/> do not try
             any additional addresses and move onto the next host if one was provided.
            </para>
           </listitem>
@@ -2593,7 +2593,7 @@ postgresql://%2Fvar%2Flib%2Fpostgresql/dbname
            <para>
             If a successful connection is made and that connection is found to have a
             mismatching <xref linkend="libpq-connect-target-session-attrs"/> proceed
-            to check any additional addresses.
+            to try any additional addresses.
            </para>
           </listitem>
          </varlistentry>
