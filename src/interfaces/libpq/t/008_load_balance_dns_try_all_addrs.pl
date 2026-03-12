@@ -90,20 +90,20 @@ sub test_target_session_attr {
 	  $node_primary1_occurrences + $node_standby_occurrences + $node_primary2_occurrences;
 
 	if ($primary1_expect_traffic == 1) {
-		ok($node_primary1_occurrences > 0, "received at least one connection on node1");
+		ok($node_primary1_occurrences > 0, "received at least one connection on node primary1");
 	}else{
-		ok($node_primary1_occurrences == 0, "received at least one connection on node1");
+		ok($node_primary1_occurrences == 0, "received no connections on node primary1");
 	}
 	if ($standby_expect_traffic == 1) {
-		ok($node_standby_occurrences > 0, "received at least one connection on node1");
+		ok($node_standby_occurrences > 0, "received at least one connection on node standby");
 	}else{
-		ok($node_standby_occurrences == 0, "received at least one connection on node1");
+		ok($node_standby_occurrences == 0, "received no connections on node standby");
 	}
 
 	if ($primary2_expect_traffic == 1) {
-		ok($node_primary2_occurrences > 0, "received at least one connection on node1");
+		ok($node_primary2_occurrences > 0, "received at least one connection on node primary2");
 	}else{
-		ok($node_primary2_occurrences == 0, "received at least one connection on node1");
+		ok($node_primary2_occurrences == 0, "received no connections on primary2");
 	}
 
 	ok($total_occurrences == 50, "received 50 connections across all nodes");
