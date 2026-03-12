@@ -125,6 +125,7 @@ static int	ldapServiceLookup(const char *purl, PQconninfoOption *options,
 #endif
 #define DefaultTargetSessionAttrs	"any"
 #define DefaultLoadBalanceHosts	"disable"
+#define DefaultTryAllAddrs	"0"
 #ifdef USE_SSL
 #define DefaultSSLMode "prefer"
 #define DefaultSSLCertMode "allow"
@@ -395,7 +396,7 @@ static const internalPQconninfoOption PQconninfoOptions[] = {
 	offsetof(struct pg_conn, scram_server_key)},
 
 	{"try_all_addrs", "PGTRYALLADDRS",
-		"0", NULL,
+		DefaultTryAllAddrs, NULL,
 		"Try-All-Addrs", "", 1,
 	offsetof(struct pg_conn, try_all_addrs)},
 
