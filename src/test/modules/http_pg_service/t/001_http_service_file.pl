@@ -8,16 +8,16 @@ use PostgreSQL::Test::Cluster;
 use PostgreSQL::Test::Utils;
 use Test::More;
 
-use PgRemoteService::Server;
+use PgHttpService::Server;
 
 if ($ENV{with_libcurl} ne 'yes')
 {
-	plan skip_all => 'Remote service file not supported by this build';
+	plan skip_all => 'HTTP service file not supported by this build';
 }
 
 if ($ENV{with_python} ne 'yes')
 {
-	plan skip_all => 'Remote service tests require --with-python to run';
+	plan skip_all => 'HTTP service tests require --with-python to run';
 }
 
 my $td = PostgreSQL::Test::Utils::tempdir;
@@ -53,7 +53,7 @@ append_to_file($srvfile_valid, $newline);
 my $srvfile_empty = "$td/pg_service_empty.conf";
 append_to_file($srvfile_empty, '');
 
-my $server = PgRemoteService::Server->new();
+my $server = PgHttpService::Server->new();
 $server->run($srvfile_valid);
 
 my $port = $server->port;

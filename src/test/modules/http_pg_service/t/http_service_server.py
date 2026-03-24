@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
-# A mock remote pg_service server, designed to be invoked from
-# PgRemoteService/Server.pm. This listens on an ephemeral port number (printed to stdout
+# A mock http pg_service server, designed to be invoked from
+# PgHttpService/Server.pm. This listens on an ephemeral port number (printed to stdout
 # so that the Perl tests can contact it) and runs as a daemon until it is
 # signaled.
 #
@@ -50,7 +50,7 @@ class ServiceFileHandler(http.server.BaseHTTPRequestHandler):
 
 def main():
     """
-    Starts the PgRemoteService server on localhost. The ephemeral port in use will
+    Starts the PgHttpService server on localhost. The ephemeral port in use will
     be printed to stdout.
     """
 
