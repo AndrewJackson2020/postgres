@@ -6,6 +6,7 @@
 #include "postgres_fe.h"
 #include "pqexpbuffer.h"
 #include <errno.h>
+#include "oauth-utils.h"
 #include "http-service.h"
 
 enum fcurl_type_e {
@@ -414,7 +415,7 @@ parse_service_file_curl(const char *serviceFile,
 	f = url_fopen(serviceFile, "r");
 	if (f == NULL)
 	{
-		libpq_append_error(errorMessage, "service file \"%s\" not found", serviceFile);
+		// libpq_append_error(errorMessage, "service file \"%s\" not found", serviceFile);
 		return 1;
 	}
 
@@ -426,10 +427,10 @@ parse_service_file_curl(const char *serviceFile,
 
 		if (strlen(line) >= sizeof(buf) - 1)
 		{
-			libpq_append_error(errorMessage,
-							   "line %d too long in service file \"%s\"",
-							   linenr,
-							   serviceFile);
+			// libpq_append_error(errorMessage,
+							   // "line %d too long in service file \"%s\"",
+							   // linenr,
+							   // serviceFile);
 			result = 2;
 			goto exit;
 		}
@@ -497,10 +498,10 @@ parse_service_file_curl(const char *serviceFile,
 				val = strchr(line, '=');
 				if (val == NULL)
 				{
-					libpq_append_error(errorMessage,
-									   "syntax error in service file \"%s\", line %d",
-									   serviceFile,
-									   linenr);
+					// libpq_append_error(errorMessage,
+				// 					   "syntax error in service file \"%s\", line %d",
+				// 					   serviceFile,
+				// 					   linenr);
 					result = 3;
 					goto exit;
 				}
@@ -508,10 +509,10 @@ parse_service_file_curl(const char *serviceFile,
 
 				if (strcmp(key, "service") == 0)
 				{
-					libpq_append_error(errorMessage,
-									   "nested service specifications not supported in service file \"%s\", line %d",
-									   serviceFile,
-									   linenr);
+					// libpq_append_error(errorMessage,
+				//					   "nested service specifications not supported in service file \"%s\", line %d",
+				//					   serviceFile,
+				//					   linenr);
 					result = 3;
 					goto exit;
 				}
@@ -529,7 +530,7 @@ parse_service_file_curl(const char *serviceFile,
 							options[i].val = strdup(val);
 						if (!options[i].val)
 						{
-							libpq_append_error(errorMessage, "out of memory");
+							// libpq_append_error(errorMessage, "out of memory");
 							result = 3;
 							goto exit;
 						}
@@ -540,10 +541,10 @@ parse_service_file_curl(const char *serviceFile,
 
 				if (!found_keyword)
 				{
-					libpq_append_error(errorMessage,
-									   "syntax error in service file \"%s\", line %d",
-									   serviceFile,
-									   linenr);
+					// libpq_append_error(errorMessage,
+					//				   "syntax error in service file \"%s\", line %d",
+					//				   serviceFile,
+					//				   linenr);
 					result = 3;
 					goto exit;
 				}

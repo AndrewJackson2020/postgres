@@ -6046,7 +6046,7 @@ parseServiceInfo(PQconninfoOption *options, PQExpBuffer errorMessage)
 		builtin_flow = dlopen(module_name, RTLD_NOW | RTLD_LOCAL);
 		if (builtin_flow)
 		{
-			if (parse_service_file_curl = dlsym(builtin_flow, "parse_service_file_curl") != NULL)
+			if ((parse_service_file_curl = dlsym(builtin_flow, "parse_service_file_curl")) != NULL)
 			{
 				status = parse_service_file_curl(serviceFile, service, options, errorMessage, &group_found);
 				if (group_found || status != 0)
