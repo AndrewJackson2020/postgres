@@ -9,7 +9,7 @@
 #
 #-------------------------------------------------------------------------
 
-PGFILEDESC = "validator - test OAuth validator module"
+PGFILEDESC = "http_pg_service - test http_service module"
 
 PGAPPICON = win32
 
@@ -25,7 +25,7 @@ PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else
-subdir = src/test/modules/remote_pg_service
+subdir = src/test/modules/http_pg_service
 top_builddir = ../../../..
 include $(top_builddir)/src/Makefile.global
 include $(top_srcdir)/contrib/contrib-global.mk

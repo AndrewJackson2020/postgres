@@ -4,13 +4,13 @@
 
 =head1 NAME
 
-PgRemoteService::Server - runs a mock pg_service HTTP server for testing
+PgHttpService::Server - runs a mock pg_service HTTP server for testing
 
 =head1 SYNOPSIS
 
-  use PgRemoteService::Server;
+  use PgHttpService::Server;
 
-  my $server = PgRemoteService::Server->new();
+  my $server = PgHttpService::Server->new();
   $server->run;
 
   my $port = $server->port;
@@ -23,16 +23,16 @@ PgRemoteService::Server - runs a mock pg_service HTTP server for testing
 =head1 DESCRIPTION
 
 This is glue API between the Perl tests and the Python pg_service server
-daemon implemented in t/remote_service_server.py. (Python has a fairly usable HTTP server
+daemon implemented in t/http_service_server.py. (Python has a fairly usable HTTP server
 in its standard library, so the implementation was ported from Perl.)
 
 This pg_service server does not use TLS (it implements a nonstandard, unsafe
 issuer at "http://127.0.0.1:<port>"), so libpq in particular will need to set
-PGREMOTESERVICEBUG=UNSAFE to be able to talk to it.
+PGHTTPSERVICEBUG=UNSAFE to be able to talk to it.
 
 =cut
 
-package PgRemoteService::Server;
+package PgHttpService::Server;
 
 use warnings;
 use strict;
@@ -45,9 +45,9 @@ use Test::More;
 
 =over
 
-=item PgRemoteService::Server::Server->new()
+=item PgHttpService::Server::Server->new()
 
-Create a new Remote PG Service Server object.
+Create a new HTTP PG Service Server object.
 
 =cut
 
@@ -80,7 +80,7 @@ sub port
 
 =item $server->run()
 
-Runs the remote pg service server daemon in t/remote_service_server.py.
+Runs the http pg service server daemon in t/http_service_server.py.
 
 =cut
 
@@ -91,8 +91,8 @@ sub run
 	my $port;
 
 	print $ENV{PYTHON};
-	my $pid = open(my $read_fh, "-|", "python", "t/remote_service_server.py", $service_file_path)
-	  or die "failed to start remote pg_service server: $!";
+	my $pid = open(my $read_fh, "-|", "python", "t/http_service_server.py", $service_file_path)
+	  or die "failed to start http pg_service server: $!";
 
 	# Get the port number from the daemon. It closes stdout afterwards; that way
 	# we can slurp in the entire contents here rather than worrying about the
@@ -107,14 +107,14 @@ sub run
 	$self->{'port'} = $port;
 	$self->{'child'} = $read_fh;
 
-	note("Remote pg_service (PID $pid) is listening on port $port\n");
+	note("HTTP pg_service (PID $pid) is listening on port $port\n");
 }
 
 =pod
 
 =item $server->stop()
 
-Sends SIGTERM to the remote pg_service server and waits for it to exit.
+Sends SIGTERM to the http pg_service server and waits for it to exit.
 
 =cut
 
@@ -122,7 +122,7 @@ sub stop
 {
 	my $self = shift;
 
-	note("Sending SIGTERM to remote pg_service PID: $self->{'pid'}\n");
+	note("Sending SIGTERM to http pg_service PID: $self->{'pid'}\n");
 
 	kill(15, $self->{'pid'});
 	$self->{'pid'} = undef;

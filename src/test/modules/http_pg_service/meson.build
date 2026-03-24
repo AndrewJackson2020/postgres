@@ -1,7 +1,7 @@
 # Copyright (c) 2025, PostgreSQL Global Development Group
 
 tests += {
-  'name': 'oauth_validator',
+  'name': 'http_pg_service',
   'sd': meson.current_source_dir(),
   'bd': meson.current_build_dir(),
   'tap': {
