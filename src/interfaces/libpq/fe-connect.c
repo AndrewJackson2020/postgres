@@ -6048,6 +6048,11 @@ next_file:
 last_file:
 	if (!group_found)
 	{
+#ifdef USE_LDAP
+		if (strncmp(service, "ldap", 4) == 0)
+			/* if error ignore ldapServiceLookup return value, just return 3 */
+			return ldapServiceLookup(service, options, errorMessage) ? 3 : 0;
+#endif
 		libpq_append_error(errorMessage, "definition of service \"%s\" not found", service);
 		return 3;
 	}

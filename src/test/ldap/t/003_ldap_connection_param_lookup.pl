@@ -62,6 +62,20 @@ description:port=} . $node->port . qq{
 
 $ldap->ldapadd_file($ldif_valid);
 
+my $ldif_valid_invalid = "$td/connection_params_ldif_valid_invalid.ldif";
+append_to_file(
+	$ldif_valid_invalid , qq{
+version:1
+dn:cn=mydatabasefoundinpgservice,dc=example,dc=net
+changetype:add
+objectclass:top
+objectclass:device
+cn:mydatabasefoundinpgservice
+description:host=} . $node->host . qq{
+description:port=} . $node->port . qq{
+});
+$ldap->ldapadd_file($ldif_valid_invalid);
+
 my ($ldap_server, $ldap_port, $ldaps_port, $ldap_url,
 	$ldaps_url, $ldap_basedn, $ldap_rootdn
 ) = $ldap->prop(qw(server port s_port url s_url basedn rootdn));
@@ -80,6 +94,9 @@ append_to_file(
 	$srvfile_valid, qq{
 [my_srv]
 ldap://localhost:$ldap_port/dc=example,dc=net?description?one?(cn=mydatabase)
+
+[ldap://localhost:$ldap_port/dc=example,dc=net?description?one?(cn=mydatabasefoundinpgservice)]
+port=1234
 });
 
 # File defined with no contents, used as default value for
@@ -193,6 +210,37 @@ local $ENV{PGSERVICEFILE} = "$srvfile_empty";
 	$dummy_node->connect_fails(
 		'',
 		'connection with incorrect PGSERVICE and default pg_service.conf',
+		expected_stdout =>
+		  qr/definition of service "undefined-service" not found/);
+
+	delete $ENV{PGSERVICE};
+
+	$dummy_node->connect_ok(
+		"service=ldap://localhost:$ldap_port/dc=example,dc=net?description?one?(cn=mydatabase)",
+		'connection with correct "service" string populated with LDAP address',
+		sql => "SELECT 'connect2_4'",
+		expected_stdout => qr/connect2_4/);
+
+	$dummy_node->connect_ok(
+		"postgres://?service=ldap%3A%2F%2Flocalhost%3A$ldap_port%2Fdc%3Dexample%2Cdc%3Dnet%3Fdescription%3Fone%3F%28cn%3Dmydatabase%29",
+		'connection with correct "ldapservice" string populated with LDAP address',
+		sql => "SELECT 'connect2_5'",
+		expected_stdout => qr/connect2_5/);
+
+	local $ENV{PGSERVICE} = "ldap://localhost:$ldap_port/dc=example,dc=net?description?one?(cn=mydatabase)";
+	$dummy_node->connect_ok(
+		"",
+		'connection with correct "service" provided by env var populated with LDAP address',
+		sql => "SELECT 'connect2_6'",
+		expected_stdout => qr/connect2_6/);
+	delete $ENV{PGLDAPSERVICE};
+
+	# Below test should fail because the service value is defined as a literal service in pg_service.conf.
+	# The pg_service.conf entry should have an incorrect port and LDAP should not be looked up after reading
+	# the incorrect port
+	$dummy_node->connect_fails(
+		'service=ldap://localhost:$ldap_port/dc=example,dc=net?description?one?(cn=mydatabasefoundinpgservice)"',
+		'connection using cn=mydatabasefoundinpgservice',
 		expected_stdout =>
 		  qr/definition of service "undefined-service" not found/);
 
