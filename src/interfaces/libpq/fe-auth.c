@@ -66,6 +66,10 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
 				gss_flags = GSS_C_MUTUAL_FLAG;
 	gss_buffer_desc ginbuf;
 	gss_buffer_desc goutbuf;
+	static char *mechanism = 0;
+	static gss_OID oid;
+	gss_buffer_desc tok;
+    gss_OID_set_desc mechs, neg_mechs, *mechsp = GSS_C_NO_OID_SET;
 
 	/*
 	 * On first call, there's no input token. On subsequent calls, read the
@@ -108,11 +112,24 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
 	if (conn->gssdelegation && conn->gssdelegation[0] == '1')
 		gss_flags |= GSS_C_DELEG_FLAG;
 
+	mechanism = "{ 1 3 6 1 5 2 5 }";
+	tok.value = mechanism;
+	tok.length = strlen(tok.value);
+    maj_stat = gss_str_to_oid(&min_stat, &tok, &oid);
+
+	mechs.elements = oid;
+	mechs.count = 1;
+
+
+	if (maj_stat != GSS_S_COMPLETE) {
+        return STATUS_ERROR;
+    }
+
 	maj_stat = gss_init_sec_context(&min_stat,
 									conn->gcred,
 									&conn->gctx,
 									conn->gtarg_nam,
-									GSS_C_NO_OID,
+									mechs.elements,
 									gss_flags,
 									0,
 									GSS_C_NO_CHANNEL_BINDINGS,
