@@ -25,6 +25,10 @@ INIT
 		# typical paths for Homebrew on ARM
 		$krb5_bin_dir = '/opt/homebrew/opt/krb5/bin';
 		$krb5_sbin_dir = '/opt/homebrew/opt/krb5/sbin';
+
+		# nix install path
+		$krb5_bin_dir = '/run/current-system/sw/bin';
+		$krb5_sbin_dir = '/run/current-system/sw/bin';
 	}
 	elsif ($^O eq 'darwin')
 	{
@@ -51,7 +55,7 @@ INIT
 
 	if ($krb5_bin_dir && -d $krb5_bin_dir)
 	{
-		$krb5_config = $krb5_bin_dir . '/' . $krb5_config;
+		$krb5_config = '/nix/store/hwmmvpkddca99byzcj0qv87g8qaj91bb-krb5-1.22.2-dev/bin/' . '/' . $krb5_config;
 		$kinit = $krb5_bin_dir . '/' . $kinit;
 		$klist = $krb5_bin_dir . '/' . $klist;
 	}
