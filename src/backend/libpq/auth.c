@@ -953,6 +953,34 @@ queue_md5_password_warning(void)
 }
 
 
+
+static void
+display_status_1(char *m, OM_uint32 code, int type)
+{
+    OM_uint32 min_stat;
+    gss_buffer_desc msg;
+    OM_uint32 msg_ctx;
+
+    msg_ctx = 0;
+    while (1) {
+        (void) gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
+                                  &msg_ctx, &msg);
+		fprintf(stdout, "GSS-API error %s: %s\n", m,
+				(char *) msg.value);
+        (void) gss_release_buffer(&min_stat, &msg);
+
+        if (!msg_ctx)
+            break;
+    }
+}
+
+void
+display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
+{
+    display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
+    display_status_1(msg, min_stat, GSS_C_MECH_CODE);
+}
+
 /*----------------------------------------------------------------
  * GSSAPI authentication system
  *----------------------------------------------------------------
@@ -1015,16 +1043,18 @@ pg_GSS_recvauth(Port *port)
     maj_stat = gss_import_name(&min_stat, &name_buf,
                                (gss_OID) gss_nt_service_name, &server_name);
 
-	elog(DEBUG5, "gss_import_name major: %u, "
-		 "minor: %u",
-		 maj_stat, min_stat);
+	if (maj_stat != GSS_S_COMPLETE) {
+        display_status("importing name", maj_stat, min_stat);
+        return -1;
+    }
 
 	maj_stat = gss_acquire_cred(&min_stat, server_name, 0, mechs, GSS_C_ACCEPT,
-								server_creds, NULL, NULL);
+								&server_creds, NULL, NULL);
 
-	elog(DEBUG5, "gss_acquire_cred major: %u, "
-		 "minor: %u",
-		 maj_stat, min_stat);
+	if (maj_stat != GSS_S_COMPLETE) {
+        display_status("acquiring credentials", maj_stat, min_stat);
+        return -1;
+    }
 
 	delegated_creds = GSS_C_NO_CREDENTIAL;
 	port->gss->delegated_creds = false;
