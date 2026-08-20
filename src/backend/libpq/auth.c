@@ -41,6 +41,9 @@
 #include "tcop/backend_startup.h"
 #include "utils/memutils.h"
 
+#include <gssapi/gssapi_generic.h>
+#include <gssapi/gssapi_krb5.h>
+
 /*----------------------------------------------------------------
  * Global authentication functions
  *----------------------------------------------------------------
@@ -966,6 +969,12 @@ pg_GSS_recvauth(Port *port)
 	StringInfoData buf;
 	gss_buffer_desc gbuf;
 	gss_cred_id_t delegated_creds;
+	gss_OID mech = GSS_C_NO_OID;
+	gss_OID_set mechs = GSS_C_NO_OID_SET;
+	gss_OID_set_desc mechlist;
+	gss_buffer_desc name_buf;
+	gss_cred_id_t server_creds;
+	gss_name_t server_name;
 
 	/*
 	 * Use the configured keytab, if there is one.  As we now require MIT
@@ -995,6 +1004,27 @@ pg_GSS_recvauth(Port *port)
 	 * Initialize sequence with an empty context
 	 */
 	port->gss->ctx = GSS_C_NO_CONTEXT;
+
+	mech = (gss_OID)gss_mech_iakerb;
+	mechlist.count = 1;
+	mechlist.elements = mech;
+	mechs = &mechlist;
+
+	name_buf.value = "postgres";
+    name_buf.length = strlen(name_buf.value) + 1;
+    maj_stat = gss_import_name(&min_stat, &name_buf,
+                               (gss_OID) gss_nt_service_name, &server_name);
+
+	elog(DEBUG5, "gss_import_name major: %u, "
+		 "minor: %u",
+		 maj_stat, min_stat);
+
+	maj_stat = gss_acquire_cred(&min_stat, server_name, 0, mechs, GSS_C_ACCEPT,
+								server_creds, NULL, NULL);
+
+	elog(DEBUG5, "gss_acquire_cred major: %u, "
+		 "minor: %u",
+		 maj_stat, min_stat);
 
 	delegated_creds = GSS_C_NO_CREDENTIAL;
 	port->gss->delegated_creds = false;
@@ -1039,9 +1069,10 @@ pg_GSS_recvauth(Port *port)
 		elog(DEBUG4, "processing received GSS token of length %zu",
 			 gbuf.length);
 
+
 		maj_stat = gss_accept_sec_context(&min_stat,
 										  &port->gss->ctx,
-										  port->gss->cred,
+										  server_creds,
 										  &gbuf,
 										  GSS_C_NO_CHANNEL_BINDINGS,
 										  &port->gss->name,

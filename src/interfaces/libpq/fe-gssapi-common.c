@@ -64,7 +64,22 @@ pg_GSS_have_cred_cache(gss_cred_id_t *cred_out)
 				minor;
 	gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
 
-	major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, GSS_C_NO_OID_SET,
+	static char *mechanism = 0;
+	static gss_OID oid;
+        gss_buffer_desc tok;
+        gss_OID_set_desc mechs, neg_mechs, *mechsp = GSS_C_NO_OID_SET;
+
+	mechanism = "{ 1 3 6 1 5 2 5 }";
+        tok.value = mechanism;
+        tok.length = strlen(tok.value);
+        major = gss_str_to_oid(&minor, &tok, &oid);
+
+        mechs.elements = oid;
+        mechs.count = 1;
+
+	mechsp = &mechs;
+
+	major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, mechsp,
 							 GSS_C_INITIATE, &cred, NULL, NULL);
 	if (major != GSS_S_COMPLETE)
 	{
