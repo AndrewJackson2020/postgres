@@ -110,6 +110,15 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
 	if (conn->gssdelegation && conn->gssdelegation[0] == '1')
 		gss_flags |= GSS_C_DELEG_FLAG;
 
+	/* TODO Need to set 2 neg mechs, IAKERB and then KRB5 in order to trigger
+	   GSS_S_CONTINUE per https://www.rfc-editor.org/info/rfc4178/
+
+	  """
+	  Note that if more than one mechanism is specified in
+      mech_set, the order in which those mechanisms are specified implies a
+      relative preference.
+	  """
+   */
     if (conn->gssoid != GSS_C_NO_OID) {
         neg_mechs.elements = conn->gssoid;
         neg_mechs.count = 1;
