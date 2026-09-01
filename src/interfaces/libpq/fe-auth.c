@@ -66,6 +66,8 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
 				gss_flags = GSS_C_MUTUAL_FLAG;
 	gss_buffer_desc ginbuf;
 	gss_buffer_desc goutbuf;
+    gss_OID_set_desc mechs, neg_mechs, *mechsp = GSS_C_NO_OID_SET;
+	static gss_OID_desc gss_spnego_mechanism_oid_desc = {6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 
 	/*
 	 * On first call, there's no input token. On subsequent calls, read the
@@ -107,6 +109,15 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
 
 	if (conn->gssdelegation && conn->gssdelegation[0] == '1')
 		gss_flags |= GSS_C_DELEG_FLAG;
+
+    if (conn->gssoid != GSS_C_NO_OID) {
+        neg_mechs.elements = conn->gssoid;
+        neg_mechs.count = 1;
+        maj_stat = gss_set_neg_mechs(&min_stat, conn->gcred, &neg_mechs);
+    }
+	mechs.elements = &gss_spnego_mechanism_oid_desc;
+	mechs.count = 1;
+	mechsp = &mechs;
 
 	maj_stat = gss_init_sec_context(&min_stat,
 									conn->gcred,
@@ -192,6 +203,7 @@ pg_GSS_startup(PGconn *conn, int payloadlen)
 	 * context.
 	 */
 	conn->gctx = GSS_C_NO_CONTEXT;
+	conn->gssoid = GSS_C_NULL_OID;
 
 	return pg_GSS_continue(conn, payloadlen);
 }

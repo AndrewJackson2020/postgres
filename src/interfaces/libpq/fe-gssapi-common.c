@@ -63,8 +63,14 @@ pg_GSS_have_cred_cache(gss_cred_id_t *cred_out)
 	OM_uint32	major,
 				minor;
 	gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
+    gss_OID_set_desc mechs, *mechsp = GSS_C_NO_OID_SET;
+	static gss_OID_desc gss_spnego_mechanism_oid_desc = {6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 
-	major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, GSS_C_NO_OID_SET,
+	mechs.elements = &gss_spnego_mechanism_oid_desc;
+	mechs.count = 1;
+	mechsp = &mechs;
+
+	major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, mechsp,
 							 GSS_C_INITIATE, &cred, NULL, NULL);
 	if (major != GSS_S_COMPLETE)
 	{

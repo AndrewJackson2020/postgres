@@ -422,6 +422,7 @@ struct pg_conn
 	char	   *gsslib;			/* What GSS library to use ("gssapi" or
 								 * "sspi") */
 	char	   *gssdelegation;	/* Try to delegate GSS credentials? (0 or 1) */
+	gss_OID     gssoid;
 	char	   *min_protocol_version;	/* minimum used protocol version */
 	char	   *max_protocol_version;	/* maximum used protocol version */
 	char	   *ssl_min_protocol_version;	/* minimum TLS protocol version */
