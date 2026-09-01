@@ -114,6 +114,16 @@ pg_GSS_continue(PGconn *conn, int payloadlen)
         neg_mechs.elements = conn->gssoid;
         neg_mechs.count = 1;
         maj_stat = gss_set_neg_mechs(&min_stat, conn->gcred, &neg_mechs);
+		if (maj_stat != GSS_S_COMPLETE)
+		{
+			pg_GSS_error(libpq_gettext("GSSAPI continuation error"),
+						 conn,
+						 maj_stat, min_stat);
+			gss_release_name(&lmin_s, &conn->gtarg_nam);
+			if (conn->gctx)
+				gss_delete_sec_context(&lmin_s, &conn->gctx, GSS_C_NO_BUFFER);
+			return STATUS_ERROR;
+		}
     }
 	mechs.elements = &gss_spnego_mechanism_oid_desc;
 	mechs.count = 1;
